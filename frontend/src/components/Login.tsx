@@ -13,7 +13,7 @@ const Login: React.FC = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const response = await axios.post('http://localhost:3001/api/auth/login', credentials);
+      const response = await axios.post('https://sanitiq-prototype.onrender.com/api/auth/login', credentials);
       if (response.data.success) {
         localStorage.setItem('token', response.data.token);
         navigate('/');

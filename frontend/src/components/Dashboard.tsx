@@ -29,7 +29,7 @@ const Dashboard: React.FC = () => {
 
   const loadDevices = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/devices');
+      const response = await axios.get('https://sanitiq-prototype.onrender.com/api/devices');
       setDevices(response.data.devices);
     } catch (error) {
       console.error('Failed to load devices:', error);

@@ -50,7 +50,7 @@ const Sanitize: React.FC = () => {
 
   const loadDevices = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/devices');
+      const response = await axios.get('https://sanitiq-prototype.onrender.com/api/devices');
       setDevices(response.data.devices);
     } catch (error) {
       console.error('Failed to load devices:', error);
@@ -59,7 +59,7 @@ const Sanitize: React.FC = () => {
 
   const startSanitization = async () => {
     try {
-      const response = await axios.post('http://localhost:3001/api/sanitize', {
+      const response = await axios.post('https://sanitiq-prototype.onrender.com/api/sanitize', {
         device_id: selectedDevice,
         method: selectedMethod
       });
@@ -79,7 +79,7 @@ const Sanitize: React.FC = () => {
 
   const checkJobStatus = async (jobId: string) => {
     try {
-      const response = await axios.get(`http://localhost:3001/api/jobs/${jobId}`);
+      const response = await axios.get(`https://sanitiq-prototype.onrender.com/api/jobs/${jobId}`);
       const job = response.data.job;
       
       setCurrentJob(job);
@@ -95,7 +95,7 @@ const Sanitize: React.FC = () => {
 
   const generateCertificate = async (jobId: string) => {
     try {
-      await axios.post('http://localhost:3001/api/certificates', { job_id: jobId });
+      await axios.post('https://sanitiq-prototype.onrender.com/api/certificates', { job_id: jobId });
     } catch (error) {
       console.error('Failed to generate certificate:', error);
     }

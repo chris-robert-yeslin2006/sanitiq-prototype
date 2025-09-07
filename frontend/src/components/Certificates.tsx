@@ -21,7 +21,7 @@ const Certificates: React.FC = () => {
 
   const loadCertificates = async () => {
     try {
-      const response = await axios.get('http://localhost:3001/api/certificates');
+      const response = await axios.get('https://sanitiq-prototype.onrender.com/api/certificates');
       setCertificates(response.data.certificates);
     } catch (error) {
       console.error('Failed to load certificates:', error);
@@ -44,7 +44,7 @@ const Certificates: React.FC = () => {
   const downloadPDF = async (certId: string) => {
   try {
     const response = await axios.get(
-      `http://localhost:3001/api/certificates/${certId}/pdf`,
+      `https://sanitiq-prototype.onrender.com/api/certificates/${certId}/pdf`,
       { responseType: 'blob' }
     );
     

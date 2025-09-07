@@ -64,7 +64,7 @@ const Verification: React.FC = () => {
   const verifyCertificate = async (certificateId: string) => {
     try {
       setLoading(true);
-      const response = await axios.post('http://localhost:3001/api/certificates/verify', {
+      const response = await axios.post('https://sanitiq-prototype.onrender.com/api/certificates/verify', {
         certificate_id: certificateId
       });
 
@@ -86,7 +86,7 @@ const Verification: React.FC = () => {
     
     try {
       const response = await axios.get(
-        `http://localhost:3001/api/certificates/${certificate.certificate_id}/pdf`,
+        `https://sanitiq-prototype.onrender.com/api/certificates/${certificate.certificate_id}/pdf`,
         { responseType: 'blob' }
       );
       
