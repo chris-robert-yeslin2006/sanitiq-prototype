@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: sanitiq-prototype
+    runtime: node
+    buildCommand: yarn install
+    startCommand: yarn start
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        fromService:
+          type: web
+          name: sanitiq-prototype
