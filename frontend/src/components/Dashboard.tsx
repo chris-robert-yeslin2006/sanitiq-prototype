@@ -86,7 +86,7 @@ const Dashboard: React.FC = () => {
                 <Box display="flex" alignItems="center">
                   <Security color="success" sx={{ mr: 2 }} />
                   <Box>
-                    <Typography variant="h4">0</Typography>
+                    <Typography variant="h4">6</Typography>
                     <Typography color="text.secondary">Completed Wipes</Typography>
                   </Box>
                 </Box>
@@ -100,7 +100,7 @@ const Dashboard: React.FC = () => {
                 <Box display="flex" alignItems="center">
                   <VerifiedUser color="secondary" sx={{ mr: 2 }} />
                   <Box>
-                    <Typography variant="h4">0</Typography>
+                    <Typography variant="h4">3</Typography>
                     <Typography color="text.secondary">Certificates</Typography>
                   </Box>
                 </Box>
