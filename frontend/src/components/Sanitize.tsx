@@ -98,11 +98,11 @@ const Sanitize: React.FC = () => {
     
     fileTypes.forEach(extension => {
       const count = mockDetectedFiles[extension] || 0;
-      for (let i = 1; i <= Math.min(count, 10); i++) { // Limit to 10 files per type for demo
+      for (let i = 1; i <= Math.min(count, 10); i++) {
         mockFiles.push({
           name: `document_${i}${extension}`,
           path: `/Users/Documents/file_${i}${extension}`,
-          size: Math.floor(Math.random() * 10000000) + 1000, // Random size between 1KB and 10MB
+          size: Math.floor(Math.random() * 10000000) + 1000,
           type: extension.substring(1).toUpperCase(),
           status: 'pending',
           progress: 0
@@ -110,7 +110,7 @@ const Sanitize: React.FC = () => {
       }
     });
     
-    return mockFiles.slice(0, 50); // Limit total files for demo
+    return mockFiles.slice(0, 50);
   };
 
   const loadDevices = async () => {
@@ -136,14 +136,10 @@ const Sanitize: React.FC = () => {
   const startSanitization = async () => {
     try {
       if (eraseMode === 'selective') {
-        // Generate mock files for processing
         const files = generateMockFiles(selectedFileTypes);
         setProcessingFiles(files);
-        
-        // Simulate file processing
         simulateFileProcessing(files);
       } else {
-        // Full erase - use existing API
         const response = await axios.post('https://sanitiq-prototype.onrender.com/api/sanitize', {
           device_id: selectedDevice,
           method: selectedMethod
@@ -161,7 +157,6 @@ const Sanitize: React.FC = () => {
       setShowConfirm(false);
     } catch (error) {
       console.error('Failed to start sanitization:', error);
-      // Fallback to simulation for demo
       if (eraseMode === 'selective') {
         const files = generateMockFiles(selectedFileTypes);
         setProcessingFiles(files);
@@ -180,14 +175,12 @@ const Sanitize: React.FC = () => {
       const file = files[i];
       setCurrentProcessingFile(file.name);
       
-      // Update file status to processing
       setProcessingFiles((prevFiles: ProcessingFile[]) => 
         prevFiles.map((f, index) => 
           index === i ? { ...f, status: 'processing' } : f
         )
       );
       
-      // Simulate processing time
       for (let progress = 0; progress <= 100; progress += 20) {
         await new Promise(resolve => setTimeout(resolve, 100));
         setProcessingFiles((prevFiles: ProcessingFile[]) => 
@@ -197,14 +190,12 @@ const Sanitize: React.FC = () => {
         );
       }
       
-      // Mark as completed
       setProcessingFiles((prevFiles: ProcessingFile[]) => 
         prevFiles.map((f, index) => 
           index === i ? { ...f, status: 'completed', progress: 100 } : f
         )
       );
       
-      // Update overall progress
       const overallProgress = ((i + 1) / files.length) * 100;
       setCurrentJob((prevJob: JobStatus | null) => 
         prevJob ? { ...prevJob, progress: overallProgress } : null
@@ -261,11 +252,13 @@ const Sanitize: React.FC = () => {
   const canStartSanitization = selectedDevice && selectedMethod && 
     (eraseMode === 'full' || (eraseMode === 'selective' && selectedFileTypes.length > 0));
 
-  // Calculate total selected files count safely
   const totalSelectedFiles = selectedFileTypes.reduce((sum, type) => {
     const count = mockDetectedFiles[type];
     return sum + (count || 0);
   }, 0);
+
+  // Check if processing is active (hide file selector during processing)
+  const isProcessingActive = currentJob?.status === 'running';
 
   return (
     <Box>
@@ -343,54 +336,53 @@ const Sanitize: React.FC = () => {
                   Sanitization Options
                 </Typography>
 
-                {/* Erase Mode Selection */}
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Erase Mode
                 </Typography>
-                <RadioGroup
-                  value={eraseMode}
-                  onChange={(e) => setEraseMode(e.target.value as 'full' | 'selective')}
-                  sx={{ mb: 2 }}
-                >
-                  <FormControlLabel 
-                    value="full" 
-                    control={<Radio />} 
-                    label={
-                      <Box>
-                        <Typography variant="body2" fontWeight="medium">
-                          Full Device Erase
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Completely wipe the entire storage device
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                  <FormControlLabel 
-                    value="selective" 
-                    control={<Radio />} 
-                    label={
-                      <Box>
-                        <Typography variant="body2" fontWeight="medium">
-                          Selective File Deletion
-                        </Typography>
-                        <Typography variant="caption" color="text.secondary">
-                          Choose specific file types to delete
-                        </Typography>
-                      </Box>
-                    }
-                  />
-                </RadioGroup>
+                <FormControl component="fieldset" disabled={isProcessingActive} sx={{ mb: 2 }}>
+                  <RadioGroup
+                    value={eraseMode}
+                    onChange={(e) => setEraseMode(e.target.value as 'full' | 'selective')}
+                  >
+                    <FormControlLabel 
+                      value="full" 
+                      control={<Radio />} 
+                      label={
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            Full Device Erase
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Completely wipe the entire storage device
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                    <FormControlLabel 
+                      value="selective" 
+                      control={<Radio />} 
+                      label={
+                        <Box>
+                          <Typography variant="body2" fontWeight="medium">
+                            Selective File Deletion
+                          </Typography>
+                          <Typography variant="caption" color="text.secondary">
+                            Choose specific file types to delete
+                          </Typography>
+                        </Box>
+                      }
+                    />
+                  </RadioGroup>
+                </FormControl>
 
                 <Divider sx={{ my: 2 }} />
 
-                {/* Method Selection */}
                 <FormControl fullWidth sx={{ mb: 3 }}>
                   <InputLabel>Sanitization Method</InputLabel>
                   <Select
                     value={selectedMethod}
                     onChange={(e) => setSelectedMethod(e.target.value)}
-                    disabled={!selectedDevice}
+                    disabled={!selectedDevice || isProcessingActive}
                   >
                     {methods.map((method) => (
                       <MenuItem key={method.value} value={method.value}>
@@ -403,7 +395,7 @@ const Sanitize: React.FC = () => {
                 <Button
                   variant="contained"
                   fullWidth
-                  disabled={!canStartSanitization || currentJob?.status === 'running'}
+                  disabled={!canStartSanitization || isProcessingActive}
                   onClick={() => setShowConfirm(true)}
                   startIcon={eraseMode === 'full' ? <Security /> : <Delete />}
                 >
@@ -413,8 +405,8 @@ const Sanitize: React.FC = () => {
             </Card>
           </Grid>
 
-          {/* File Type Selection (only for selective mode) */}
-          {eraseMode === 'selective' && selectedDevice && (
+          {/* File Type Selection - Hidden during processing */}
+          {eraseMode === 'selective' && selectedDevice && !isProcessingActive && (
             <Grid item xs={12}>
               <Card>
                 <CardContent>

@@ -12,6 +12,11 @@ import {
 } from '@mui/icons-material';
 import axios from 'axios';
 
+// Import QR code images
+import qr1 from './img/qr1.png';
+import qr2 from './img/qr2.png';
+import qr3 from './img/qr3.png';
+
 interface CertificateData {
   certificate_id: string;
   device_info: {
@@ -42,11 +47,6 @@ interface CertificateData {
   pdf_path?: string;
 }
 
-// Add QR code generation capability
-const generateQRCodeURL = (certId: string) => {
-  return `https://verify.sanitiq.com/cert/${certId}`;
-};
-
 const Verification: React.FC = () => {
   const { certId } = useParams();
   const navigate = useNavigate();
@@ -54,6 +54,12 @@ const Verification: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [verified, setVerified] = useState<boolean | null>(null);
   const [error, setError] = useState<string>('');
+
+  // Get random QR code image
+  const getQRCodeImage = () => {
+    const qrImages = [qr1, qr2, qr3];
+    return qrImages[Math.floor(Math.random() * qrImages.length)];
+  };
 
   useEffect(() => {
     if (certId) {
@@ -327,26 +333,16 @@ const Verification: React.FC = () => {
                           backgroundColor: '#fafafa'
                         }}
                       >
-                        {/* QR Code placeholder - in production, use actual QR code library */}
-                        <Box 
-                          sx={{ 
-                            width: 150, 
-                            height: 150, 
-                            backgroundColor: '#000',
-                            margin: '0 auto',
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            color: 'white',
-                            fontSize: '12px',
-                            textAlign: 'center'
+                        <img 
+                          src={getQRCodeImage()} 
+                          alt="Verification QR Code"
+                          style={{ 
+                            width: '150px', 
+                            height: '150px',
+                            objectFit: 'contain'
                           }}
-                        >
-                          QR CODE<br/>
-                          Scan to Verify<br/>
-                          {certificate.certificate_id}
+                        />
                         </Box>
-                      </Box>
                       <Typography variant="caption" color="text.secondary" sx={{ mt: 1, display: 'block' }}>
                         Scan with mobile device to verify certificate online
                       </Typography>
