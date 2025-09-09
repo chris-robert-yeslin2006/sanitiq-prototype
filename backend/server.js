@@ -6,6 +6,23 @@ const path = require('path');
 const app = express();
 const PORT = 3001;
 
+function authenticateToken(req, res, next) {
+  // DEMO: Skip JWT verification
+  return next();
+}
+  // --- For real JWT token validation (if you want to enable):
+  /*
+  const authHeader = req.headers['authorization'];
+  const token = authHeader && authHeader.split(' ')[1];
+  if (!token) return res.sendStatus(401);
+
+  // Optional: Add real verification here
+  jwt.verify(token, 'your_secret_key', (err, user) => {
+    if (err) return res.sendStatus(403);
+    req.user = user;
+    next();
+  });
+  */
 // Enhanced mock data with more realistic details
 let devices = [
   {
@@ -504,6 +521,119 @@ setTimeout(() => {
   
   console.log('✅ Demo data loaded');
 }, 1000);
+// File scanning endpoint
+app.post('/api/devices/:deviceId/scan',authenticateToken,  async (req, res) => {
+  const { deviceId } = req.params;
+  const device = devices.find(d => d.id === deviceId);
+  
+  if (!device) {
+    return res.status(404).json({ success: false, error: 'Device not found' });
+  }
+
+  // Mock file detection
+  const mockFiles = {
+    '.pdf': Math.floor(Math.random() * 50) + 10,
+    '.jpg': Math.floor(Math.random() * 200) + 50,
+    '.jpeg': Math.floor(Math.random() * 100) + 25,
+    '.png': Math.floor(Math.random() * 80) + 20,
+    '.doc': Math.floor(Math.random() * 30) + 5,
+    '.docx': Math.floor(Math.random() * 40) + 10,
+    '.xls': Math.floor(Math.random() * 20) + 3,
+    '.xlsx': Math.floor(Math.random() * 25) + 5,
+    '.mp4': Math.floor(Math.random() * 15) + 2,
+    '.mp3': Math.floor(Math.random() * 60) + 15,
+    '.exe': Math.floor(Math.random() * 10) + 1,
+    '.dll': Math.floor(Math.random() * 100) + 20,
+    '.tmp': Math.floor(Math.random() * 500) + 100,
+    '.log': Math.floor(Math.random() * 50) + 10,
+  };
+
+  res.json({ success: true, detectedFiles: mockFiles });
+});
+
+// Enhanced sanitization with file processing
+app.post('/api/sanitize/files', authenticateToken, async (req, res) => {
+  const { device_id, method, selectedFileTypes } = req.body;
+  const device = devices.find(d => d.id === device_id);
+  
+  if (!device) {
+    return res.status(404).json({ success: false, error: 'Device not found' });
+  }
+
+  const jobId = `job-${Date.now()}`;
+  
+  // Generate mock files to process
+  const filesToProcess = selectedFileTypes.flatMap(fileType => {
+    const count = Math.floor(Math.random() * 10) + 1;
+    return Array.from({ length: count }, (_, i) => ({
+      name: `file_${i + 1}${fileType}`,
+      path: `/Users/Documents/file_${i + 1}${fileType}`,
+      size: Math.floor(Math.random() * 10485760), // Up to 10MB
+      type: fileType,
+      status: 'pending',
+      progress: 0
+    }));
+  });
+
+  const newJob = {
+    id: jobId,
+    device_id,
+    device,
+    method,
+    status: 'running',
+    progress: 0,
+    started_at: new Date(),
+    files: filesToProcess,
+    currentFile: null
+  };
+
+  jobs.push(newJob);
+  simulateFileProcessing(jobId);
+
+  res.json({ success: true, job_id: jobId });
+});
+
+// File processing simulation
+function simulateFileProcessing(jobId) {
+  const job = jobs.find(j => j.id === jobId);
+  if (!job || !job.files) return;
+
+  let fileIndex = 0;
+  const processNextFile = () => {
+    if (fileIndex >= job.files.length) {
+      job.status = 'completed';
+      job.progress = 100;
+      job.completed_at = new Date();
+      stats.completedWipes++;
+      setTimeout(() => generateAutoCertificate(job), 1000);
+      return;
+    }
+
+    const currentFile = job.files[fileIndex];
+    currentFile.status = 'processing';
+    job.currentFile = currentFile.name;
+    
+    // Simulate file processing time
+    const processingTime = Math.random() * 2000 + 500; // 0.5-2.5 seconds per file
+    
+    const fileProgressInterval = setInterval(() => {
+      currentFile.progress += Math.random() * 20 + 5;
+      
+      if (currentFile.progress >= 100) {
+        currentFile.progress = 100;
+        currentFile.status = Math.random() > 0.05 ? 'completed' : 'failed'; // 95% success rate
+        clearInterval(fileProgressInterval);
+        
+        fileIndex++;
+        job.progress = (fileIndex / job.files.length) * 100;
+        
+        setTimeout(processNextFile, 200); // Small delay between files
+      }
+    }, processingTime / 20);
+  };
+
+  processNextFile();
+}
 
 app.listen(PORT, () => {
   console.log(`

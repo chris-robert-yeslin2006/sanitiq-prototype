@@ -1,6 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    // "target": "es5",
+    "target": "es2017",   // or higher: es2018, es2020
+    "downlevelIteration": true,
     "lib": [
       "dom",
       "dom.iterable",
